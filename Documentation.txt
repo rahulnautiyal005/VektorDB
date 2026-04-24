@@ -1,0 +1,197 @@
+# 🌌 VektorDB
+
+**Hardware-Accelerated, Out-of-Core Vector Search Engine for AI Workloads**
+
+*C++20 | SIMD (AVX-512) | HNSW | mmap | gRPC*
+
+---
+
+💡 **Engineered for sub-millisecond similarity search across billion-scale vector datasets, bypassing RAM limits via memory-mapped I/O.**
+
+---
+
+## 📌 Architecture Overview
+
+**VektorDB** is a native C++ vector database designed to act as the retrieval backend for Large Language Models (RAG).
+
+It implements the **Hierarchical Navigable Small World (HNSW)** algorithm for Approximate Nearest Neighbor (ANN) search, optimized with CPU-specific SIMD instructions for lightning-fast distance calculations.
+
+---
+
+## 🧠 Core Engineering Achievements
+
+### ⚡ SIMD-Accelerated Math
+
+* Hand-written **AVX2 / AVX-512 intrinsics** for:
+
+  * Cosine Similarity
+  * L2 (Euclidean) Distance
+* Achieves **8x–16x throughput improvement** over naive implementations
+
+---
+
+### 💾 Out-of-Core Storage
+
+* Zero-copy memory-mapped files using **mmap**
+* Uses **madvise** for optimized OS-level paging
+* Enables search on datasets **larger than RAM (NVMe-backed)**
+
+---
+
+### 🔗 Concurrent HNSW Graph
+
+* Lock-free / fine-grained locking design
+* High-throughput concurrent reads
+* Thread-safe batch inserts
+
+---
+
+### 🐍 Python Interoperability
+
+* Zero-overhead bindings using **pybind11**
+* Acts as a drop-in replacement for:
+
+  * FAISS
+  * Annoy
+
+---
+
+## ⚙️ Tech Stack
+
+| Layer             | Technology                                  |
+| ----------------- | ------------------------------------------- |
+| Core Language     | C++20 (Templates, Concepts, Smart Pointers) |
+| Math Acceleration | Intel Intrinsics (AVX2 / AVX-512)           |
+| Storage I/O       | POSIX mmap, madvise                         |
+| Concurrency       | std::shared_mutex, atomic operations        |
+| RPC / Networking  | gRPC, Protocol Buffers                      |
+| Bindings          | pybind11                                    |
+| Build / Testing   | CMake, Google Test, Google Benchmark        |
+
+---
+
+## 🛣️ Implementation Roadmap
+
+> ⚠️ **This is a marathon, not a sprint. Build from CPU → Storage → Index → API.**
+
+---
+
+### 🧮 Phase 1: The Math Engine (Weeks 1–2)
+
+Goal: Compute vector similarity as fast as possible.
+
+* Implement baseline:
+
+  * Euclidean Distance (L2)
+  * Cosine Similarity
+
+    ```
+    cos(θ) = (A · B) / (||A|| ||B||)
+    ```
+
+* Setup **Google Benchmark** for performance measurement
+
+* Rewrite using **AVX2 intrinsics** (e.g., `_mm256_dp_ps`)
+
+* Compare performance → target **massive latency reduction**
+
+💡 *First major interview talking point*
+
+---
+
+### 💾 Phase 2: Flat Search & Memory Mapping (Weeks 3–4)
+
+* Design custom `.vkdb` binary format:
+
+  * Header (metadata, dimension, vector count)
+  * Contiguous float vectors
+
+* Implement storage using **mmap**
+
+* Build naive **O(N)** nearest neighbor search
+
+* Use SIMD math for fast computation
+
+---
+
+### 🧠 Phase 3: HNSW Graph (Weeks 5–7) ⚠️ *Hardest Part*
+
+* Study original HNSW paper (Malkov & Yashunin)
+
+#### Key Components:
+
+* Multi-layer graph structure
+* Adjacency list optimized for memory locality
+* Greedy search algorithm
+* Probabilistic insertion logic
+
+---
+
+### ⚙️ Phase 4: Concurrency & API (Weeks 8–9)
+
+* Add thread safety:
+
+  * `std::shared_mutex` for read-write locks
+
+* Build **gRPC server**
+
+  ```
+  service Vektor {
+    rpc Search(Query) returns (Results);
+  }
+  ```
+
+* (Optional 🔥) Add Python bindings using **pybind11**
+
+---
+
+## 📚 Study Resources
+
+* 📄 HNSW Paper:
+  *Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs*
+  — Malkov, Yashunin
+
+* 🧠 SIMD Intrinsics Guide:
+  Intel official AVX2 / AVX-512 documentation
+
+* 💾 Memory Management:
+
+  * `mmap(2)`
+  * `madvise(2)`
+    (Focus: `MADV_RANDOM` vs `MADV_SEQUENTIAL`)
+
+* 🔍 Reference Code:
+
+  * FAISS (Meta)
+  * hnswlib
+
+---
+
+## 🎯 Final Goal
+
+Build a **production-grade vector database** capable of:
+
+* ⚡ Sub-millisecond ANN search
+* 📦 Billion-scale vector indexing
+* 🧠 AI-ready retrieval backend (RAG systems)
+
+---
+
+## 👨‍💻 Author
+
+**Rahul Nautiyal**
+
+* GitHub: https://github.com/rahulnautiyal005
+* LinkedIn: https://www.linkedin.com/in/rahul-nautiyal-b749b62a5
+
+---
+
+## ⭐ Support
+
+If you like this project, consider giving it a ⭐
+
+---
+
+## 📄 License
+
+MIT License
