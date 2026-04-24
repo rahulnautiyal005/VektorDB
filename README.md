@@ -146,6 +146,6 @@ int main() {
 ---
 
 <div align="center">
-  <p>Designed and Built by <b>Rahul Nautiyal</b></p>
+  <p>Designed and Built by <b>Rahul Nautiyal ❤️</b></p>
   <p>Released under the <a href="LICENSE">MIT License</a></p>
 </div>
