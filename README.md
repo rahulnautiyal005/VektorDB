@@ -1,96 +1,104 @@
 <div align="center">
-  <h1>🌌 VektorDB</h1>
-  <p><b>Hardware-Accelerated, Out-of-Core Vector Search Engine for AI Workloads</b></p>
-  <p><i>C++20 | SIMD (AVX2/FMA) | HNSW Graph | Memory-Mapped I/O</i></p>
+  <br />
+  <h1>🌌 VEKTORDB</h1>
+  <p>
+    <b>Hardware-Accelerated, Out-of-Core Vector Search Engine for Modern AI Workloads</b>
+  </p>
+  <p>
+    <i>Architected and Developed by <b>Rahul Nautiyal</b></i>
+  </p>
+  <br />
+  <p>
+    <img src="https://img.shields.io/badge/C++-20-blue.svg?style=for-the-badge&logo=c%2B%2B" alt="C++20" />
+    <img src="https://img.shields.io/badge/Architecture-AVX2%20%7C%20FMA-lightgrey.svg?style=for-the-badge&logo=amd" alt="AVX2" />
+    <img src="https://img.shields.io/badge/Algorithm-HNSW-green.svg?style=for-the-badge&logo=graphql" alt="HNSW" />
+    <img src="https://img.shields.io/badge/License-MIT-black.svg?style=for-the-badge" alt="License" />
+  </p>
 </div>
 
----
+<br />
 
-**VektorDB** is a native C++ vector database engineered from scratch to be the retrieval backend for Large Language Models (RAG pipelines). It easily handles large-scale semantic embeddings and computes semantic similarity at blazing speed.
-
-## 🧠 Core Engineering Achievements
-
-1. **⚡ SIMD-Accelerated Math Engine**
-   - Hand-written **AVX2 / FMA intrinsics** for Cosine Similarity, L2 Euclidean Distance, and Dot Product.
-   - Run-time CPU dispatching: gracefully scales back to Scalar logic if AVX is missing.
-   - Up to **10x faster** than standard C++ calculations.
-
-2. **💾 Zero-Copy Out-of-Core Storage**
-   - Bypasses RAM constraints using OS-level **memory-mapped files** (`mmap` on POSIX, `MapViewOfFile` on Windows).
-   - Custom `.vkdb` binary format explicitly tuned for 32-byte SIMD alignments.
-
-3. **🕸️ Concurrent HNSW Graph Index**
-   - Fully implemented the benchmark Hierarchical Navigable Small World (HNSW) algorithm from scratch based on Yu. A. Malkov's paper.
-   - Incredible search speed: >10,000 embedded nodes traverse in **< 400 microseconds**.
-   - Thread-safe inserts utilizing node-level locking and atomic graph entry point shifting.
+> **VektorDB** is a state-of-the-art native C++ vector database built entirely from scratch. Engineered specifically as the retrieval backbone for Large Language Model (RAG) pipelines, it effortlessly manages massive embeddings and computes semantic similarities at blazing, hardware-accelerated speeds.
 
 ---
 
-## 📊 Performance Benchmarks (Ryzen 5)
+## ✦ Core Engineering Achievements
 
-Tested on 1536-Dimensional Embeddings (OpenAI standard sizes).
+### ⚡ SIMD-Accelerated Math Engine
+Hand-written **AVX2 & FMA intrinsics** explicitly crafted for core operations (Cosine Similarity, L2 Euclidean Distance, Dot Product). Features automatic run-time CPU dispatching, gracefully falling back to scalar operations if legacy hardware is detected. The result? Up to **10x higher throughput** than standard C++ calculations.
 
-| Operation | Scalar Standard | AVX2 / FMA | Speedup |
-|-----------|-----------------|------------|---------|
-| L2 Euclidean | 751 ns | 87 ns | **8.5x** |
-| Cosine Similarity | 997 ns | 135 ns | **7.4x** |
-| Dot Product | 755 ns | 82 ns | **9.1x** |
+### 💾 Zero-Copy Out-of-Core Storage
+VektorDB actively bypasses conventional RAM constraints through direct OS-level **memory-mapped files** (`mmap` on POSIX, `MapViewOfFile` on Windows). The proprietary `.vkdb` binary format is architecturally precision-tuned for 32-byte SIMD cache alignments.
+
+### 🕸️ Concurrent HNSW Graph Index
+A flawless from-scratch implementation of the Hierarchical Navigable Small World (HNSW) algorithm (Malkov, 2018). Optimized for severe concurrency, it uses node-level atomic locking to ensure thread-safe insertions while traversing an embedded graph of >10,000 nodes in **sub-400 microseconds**.
 
 ---
 
-## 🛠️ Building the Project
+## ✦ Performance Benchmarks
 
-This project uses modern CMake (FetchContent) and requires a C++20 compatible compiler (e.g., GCC 11+, MSVC 2022+).
+*Evaluated rigorously against OpenAI's standard 1536-Dimensional Embeddings on an AMD Ryzen 5 processor.*
 
-### 1. Build Compilation
-```sh
+| Operation | Standard Scalar | AVX2 + FMA | Throughput Speedup |
+| :--- | :--- | :--- | :--- |
+| **L2 Euclidean** | `751 ns` | `87 ns` | 🔥 **8.5x Faster** |
+| **Cosine Similarity** | `997 ns` | `135 ns` | 🔥 **7.4x Faster** |
+| **Dot Product** | `755 ns` | `82 ns` | 🔥 **9.1x Faster** |
+
+---
+
+## ✦ System Architecture
+
+```mermaid
+graph TD
+    A["VektorDB Core API<br/>vektor_db.h"] -->|Manages| B["HNSW Graph Index<br/>(Similarity Search)"]
+    A -->|Manages| C["Vector Data Store<br/>(Flat Engine)"]
+    
+    B --> D{"Runtime CPU Dispatcher<br/>distance.h"}
+    C --> D
+    
+    C --> E["Memory-Mapped I/O<br/>(.vkdb Format)"]
+    
+    D -.->|Fast Path| F["AVX2/FMA Intrinsics"]
+    D -.->|Fallback| G["Scalar Core"]
+
+    style A fill:#0d1117,stroke:#58a6ff,color:#fff,stroke-width:2px
+    style B fill:#0d1117,stroke:#3fb950,color:#fff,stroke-width:2px
+    style C fill:#0d1117,stroke:#d29922,color:#fff,stroke-width:2px
+    style D fill:#161b22,stroke:#8b949e,color:#fff
+    style E fill:#161b22,stroke:#8b949e,color:#fff
+```
+
+---
+
+## ✦ Getting Started
+
+VektorDB utilizes Modern CMake (via FetchContent) and demands a strict C++20 compliance compiler (e.g., GCC 11+, MSVC 2022+).
+
+### 1. Build Verification
+```bash
 mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j $(nproc)
 ```
 
-### 2. Verify Run Tests
-Powered by Google Test. Ensures absolute mathematical and topological correctness.
-```sh
+### 2. Run Test Suites
+Powered by Google Test to enforce absolute mathematical precision and structural integrity.
+```bash
 ./build/tests/vektordb_tests
 ```
 
-### 3. Run the Microbenchmarks
-Powered by Google Benchmark. Evaluates scalar vs vectorized throughput.
-```sh
+### 3. Run Microbenchmarks
+Powered by Google Benchmark to isolate vectorized instruction throughput.
+```bash
 ./build/benchmarks/vektordb_bench
 ```
 
-### 4. Run the End-to-End Demo
-Initializes the HNSW graph, injects 10,000 vectors, and performs high-speed traversals.
-```sh
-./build/vektordb_demo
-```
-
 ---
 
-## 🚀 Architecture Diagram
+## ✦ Developer API Example
 
-```mermaid
-graph TD
-    A["VektorDB API<br/>vektor_db.h"] --> B["HNSW Index<br/>(Similarity Search)"]
-    A --> C["Vector Store<br/>(Storage Engine)"]
-    B --> D["Runtime Dispatcher<br/>distance.h"]
-    C --> D
-    C --> E["Mmap File<br/>(OS-level caching)"]
-    D -.-> F["AVX2 Intrinsics"]
-    D -.-> G["Scalar Backup"]
-
-    style A fill:#1a3a5c,stroke:#2196F3,color:#fff
-    style B fill:#5a4a27,stroke:#FF9800,color:#fff
-    style C fill:#2d5a27,stroke:#4CAF50,color:#fff
-```
-
----
-
-## 💻 Quick Start (C++ API)
-
-Integrating `VektorDB` into your own application is extremely concise:
+Integrating VektorDB into your C++ ecosystem is architected to be profoundly elegant:
 
 ```cpp
 #include "vektordb/core/vektor_db.h"
@@ -99,26 +107,25 @@ Integrating `VektorDB` into your own application is extremely concise:
 using namespace vektordb;
 
 int main() {
-    // 1. Configure the HNSW Index parameters
+    // 1. Configure the HNSW Graph parameters
     index::HnswConfig config;
     config.M = 16;
     config.ef_construction = 200;
 
-    // 2. Initialize the Database (Dimension: 128, Metric: L2 Distance)
+    // 2. Initialize Engine (Dimensions: 128, Metric: L2)
     VektorDB db(128, math::DistanceMetric::L2, config);
 
-    // 3. Insert vectors
+    // 3. Mount Vector Data
     float vec1[128] = {0.5f, 0.1f, /* ... */};
-    db.insert(vec1, 1001); // 1001 is the user-defined external ID
+    db.insert(vec1, 1001); // Bind to external ID
 
-    // 4. Query the database
+    // 4. Retrieve Nearest Neighbors
     float query[128] = {0.4f, 0.2f, /* ... */};
-    uint32_t k = 5; // Get top 5 results
+    uint32_t k = 5; 
     
-    // ef_search controls the recall/speed tradeoff
-    auto results = db.search(query, k, 50);
+    auto results = db.search(query, k, 50 /* ef_search */);
 
-    // 5. Process results
+    // 5. Output
     for (const auto& res : results) {
         std::cout << "Matched ID: " << res.id << " (Distance: " << res.distance << ")\n";
     }
@@ -129,19 +136,16 @@ int main() {
 
 ---
 
-## 🗺️ Roadmap & Future Work
+## ✦ Engineering Roadmap
 
-While the core math and HNSW engine are implemented flawlessly, Phase 2 of VektorDB development will focus on network distribution and broad accessibility:
-
-- [ ] **gRPC / Protocol Buffers Server Layer**: Turn VektorDB into a standalone microservice.
-- [ ] **Python Bindings (`pybind11`)**: Allow data scientists to use the database seamlessly via a `pip install`.
-- [ ] **IVF-FLAT / IVF-PQ Indexing**: Support inverted file indexes and product quantization for extreme memory compression on terabyte-scale sets.
-- [ ] **AVX-512 Support**: Further optimize instruction pipelines for the latest generation server hardware.
+- [ ] **Protocol Buffers / gRPC Edge Node**: Deploy VektorDB instantly as an isolated microservice.
+- [ ] **Python Interoperability (`pybind11`)**: Provide pip-installable data-science integrations.
+- [ ] **IVF-PQ Support**: Inverted File Indexing with Product Quantization.
+- [ ] **AVX-512 Instruction Optimization**: Maximum leverage for modern Xeon/EPYC scaling.
 
 ---
 
-## 📄 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for full details. 
-
-Contributions, pull requests, issues, and feature requests are highly welcome!
+<div align="center">
+  <p>Designed and Built by <b>Rahul Nautiyal</b></p>
+  <p>Released under the <a href="LICENSE">MIT License</a></p>
+</div>
