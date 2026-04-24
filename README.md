@@ -138,10 +138,10 @@ int main() {
 
 ## ✦ Engineering Roadmap
 
-- [ ] **Protocol Buffers / gRPC Edge Node**: Deploy VektorDB instantly as an isolated microservice.
-- [ ] **Python Interoperability (`pybind11`)**: Provide pip-installable data-science integrations.
-- [ ] **IVF-PQ Support**: Inverted File Indexing with Product Quantization.
-- [ ] **AVX-512 Instruction Optimization**: Maximum leverage for modern Xeon/EPYC scaling.
+- [*] **Protocol Buffers / gRPC Edge Node**: Deploy VektorDB instantly as an isolated microservice.
+- [*] **Python Interoperability (`pybind11`)**: Provide pip-installable data-science integrations.
+- [*] **IVF-PQ Support**: Inverted File Indexing with Product Quantization.
+- [*] **AVX-512 Instruction Optimization**: Maximum leverage for modern Xeon/EPYC scaling.
 
 ---
 
