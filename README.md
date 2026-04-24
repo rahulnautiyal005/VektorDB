@@ -78,3 +78,62 @@ VektorDB API
       ├── Runtime SIMD Dispatcher (AVX2/Scalar)
       └── Memory-Mapped OS Files (.vkdb format)
 ```
+
+---
+
+## 💻 Quick Start (C++ API)
+
+Integrating `VektorDB` into your own application is straightforward. Here is a minimal example:
+
+```cpp
+#include "vektordb/core/vektor_db.h"
+#include <iostream>
+
+using namespace vektordb;
+
+int main() {
+    // 1. Configure the HNSW Index parameters
+    index::HnswConfig config;
+    config.M = 16;
+    config.ef_construction = 200;
+
+    // 2. Initialize the Database (Dimension: 128, Metric: L2 Distance)
+    VektorDB db(128, math::DistanceMetric::L2, config);
+
+    // 3. Insert vectors
+    float vec1[128] = {0.5f, 0.1f, /* ... */};
+    db.insert(vec1, 1001); // 1001 is the user-defined external ID
+
+    // 4. Query the database
+    float query[128] = {0.4f, 0.2f, /* ... */};
+    uint32_t k = 5; // Get top 5 results
+    
+    auto results = db.search(query, k, 50 /* ef_search */);
+
+    // 5. Process results
+    for (const auto& res : results) {
+        std::cout << "Matched ID: " << res.id << " (Distance: " << res.distance << ")\n";
+    }
+
+    return 0;
+}
+```
+
+---
+
+## 🗺️ Roadmap & Future Work
+
+While the core math and HNSW engine are implemented, Phase 2 of VektorDB development will focus on distribution and accessibility:
+
+- [ ] **gRPC / Protocol Buffers Server Layer**: Turn VektorDB into a standalone microservice.
+- [ ] **Python Bindings (`pybind11`)**: Allow data scientists to use the database via a `pip install`.
+- [ ] **IVF-FLAT / IVF-PQ Indexing**: Support inverted file indexes and product quantization for extreme memory compression.
+- [ ] **AVX-512 Support**: Further optimize routines for the latest server hardware.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**. See the `LICENSE` file for full details. 
+
+Contributions, issues, and feature requests are highly welcome!
