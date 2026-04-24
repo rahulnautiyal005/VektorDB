@@ -43,6 +43,11 @@ add_library(vektordb_core STATIC
     src/math/scalar_ops.cpp
     src/math/simd_ops.cpp
     src/math/distance.cpp
+    src/storage/mmap_file.cpp
+    src/storage/vector_store.cpp
+    src/search/flat_search.cpp
+    src/index/hnsw.cpp
+    src/core/vektor_db.cpp
 )
 
 target_include_directories(vektordb_core
@@ -52,6 +57,12 @@ target_include_directories(vektordb_core
 )
 
 target_compile_features(vektordb_core PUBLIC cxx_std_20)
+
+# ============================================================================
+# Demo Executable
+# ============================================================================
+add_executable(vektordb_demo src/main.cpp)
+target_link_libraries(vektordb_demo PRIVATE vektordb_core)
 
 # ============================================================================
 # Dependencies via FetchContent
