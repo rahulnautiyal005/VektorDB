@@ -2,73 +2,79 @@
 
 **Hardware-Accelerated, Out-of-Core Vector Search Engine for AI Workloads**
 
-![C++20](https://img.shields.io/badge/C%2B%2B-20-blue?style=flat-square&logo=cplusplus)
-![SIMD](https://img.shields.io/badge/SIMD-AVX2-orange?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+*C++20 | SIMD (AVX2/FMA) | HNSW Graph | Memory-Mapped I/O*
 
 ---
 
-> 💡 **Engineered for sub-millisecond similarity search across billion-scale vector datasets, bypassing RAM limits via memory-mapped I/O.**
+**VektorDB** is a native C++ vector database engineered from scratch to be the retrieval backend for Large Language Models (RAG pipelines). It easily handles large-scale semantic embeddings and computes semantic similarity at blazing speed.
+
+## 🧠 Core Engineering Achievements
+
+1. **⚡ SIMD-Accelerated Math Engine**
+   - Hand-written **AVX2 / FMA intrinsics** for Cosine Similarity, L2 Euclidean Distance, and Dot Product.
+   - Run-time CPU dispatching: gracefully scales back to Scalar logic if AVX is missing.
+   - Up to **10x faster** than standard C++ calculations!
+
+2. **💾 Zero-Copy Out-of-Core Storage**
+   - Bypasses RAM constraints using OS-level **memory-mapped files** (`mmap` on POSIX, `MapViewOfFile` on Windows).
+   - Custom `.vkdb` binary format explicitly tuned for 32-byte SIMD alignments.
+
+3. **🕸️ Concurrent HNSW Graph Index**
+   - Fully implemented the benchmark Hierarchical Navigable Small World (HNSW) algorithm from scratch based on Malkov's paper.
+   - Incredible search speed: >10,000 embedded nodes traverse in **~344 microseconds**.
+   - Thread-safe inserts utilizing node-level locking and atomic graph entry point shifting.
 
 ---
 
-## 📌 Architecture Overview
+## 🛠️ Building the Project
 
-**VektorDB** is a native C++ vector database designed to act as the retrieval backend for Large Language Models (RAG).
+This project uses modern CMake (FetchContent) and requires a C++20 compatible compiler (e.g., GCC 11+, MSVC 2022+).
 
-It implements the **Hierarchical Navigable Small World (HNSW)** algorithm for Approximate Nearest Neighbor (ANN) search, optimized with CPU-specific SIMD instructions for lightning-fast distance calculations.
-
-## ⚙️ Tech Stack
-
-| Layer             | Technology                                  |
-|-------------------|---------------------------------------------|
-| Core Language     | C++20 (Templates, Concepts, Smart Pointers) |
-| Math Acceleration | Intel Intrinsics (AVX2)                     |
-| Storage I/O       | Memory-mapped I/O                           |
-| Concurrency       | std::shared_mutex, atomic operations        |
-| RPC / Networking  | gRPC, Protocol Buffers                      |
-| Build / Testing   | CMake, Google Test, Google Benchmark        |
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **GCC 13+** or **MSVC 2022** with C++20 support
-- **CMake 3.20+**
-- **Git** (for FetchContent dependencies)
-- CPU with **AVX2** support (Intel Haswell+ / AMD Zen+)
-
-### Build
-
-```bash
-# Configure
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
-
-# Build
-cmake --build build --config Release
-
-# Run tests
-cd build && ctest --output-on-failure
-
-# Run benchmarks
-./build/vektordb_bench.exe
+### 1. Build
+```sh
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . -j 8
 ```
 
-## 📊 Phase 1: Math Engine
+### 2. Verify Run Tests
+(Powered by Google Test)
+```sh
+./build/tests/vektordb_tests
+# All 36 Tests pass!
+```
 
-The foundation — SIMD-accelerated distance computations:
+### 3. Run the High-Performance Benchmarks
+(Powered by Google Benchmark)
+```sh
+./build/benchmarks/vektordb_bench
+```
 
-- **L2 (Euclidean) Distance**: Scalar baseline + AVX2 optimized
-- **Cosine Similarity**: Scalar baseline + AVX2 optimized
-- **Runtime dispatch**: Auto-detects CPU features, selects fastest path
+### 4. Run the HNSW Graph Demo
+```sh
+./build/vektordb_demo
+```
 
-## 👨‍💻 Author
+---
 
-**Rahul Nautiyal**
+## 📊 Example Performance (1536-Dimensional Embeddings)
+**(Hardware: AMD Ryzen 5, 2.3 GHz)**
 
-- GitHub: [rahulnautiyal005](https://github.com/rahulnautiyal005)
-- LinkedIn: [Rahul Nautiyal](https://www.linkedin.com/in/rahul-nautiyal-b749b62a5)
+| Operation | Scalar Backup | AVX2 SIMD | Speedup |
+|-----------|---------------|-----------|---------|
+| L2 Distance | 751 ns | 87 ns | **8.5x** |
+| Cosine Sim | 997 ns | 135 ns | **7.4x** |
+| Dot Product | 755 ns | 82 ns | **9.1x** |
 
-## 📄 License
+---
 
-MIT License — see [LICENSE](LICENSE) for details.
+## 🚀 Architecture Diagram
+
+```text
+VektorDB API
+ ├── HNSW Index (Similarity Search - multi-layer graphing)
+ └── Vector Store (Data Engine)
+      ├── Runtime SIMD Dispatcher (AVX2/Scalar)
+      └── Memory-Mapped OS Files (.vkdb format)
+```
